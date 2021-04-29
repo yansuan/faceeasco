@@ -4,7 +4,7 @@
 #功能说明
 https://docs.qq.com/doc/DTmpOeHV1TEZVR2Zk
 
-#平平台手册
+#云平台手册
 https://docs.qq.com/doc/DTmdQSmtmc0pFeWhT
 
 #对接指南
