@@ -1,9 +1,12 @@
 package faceeasco
 
-import "net/http"
+import (
+	"encoding/json"
+	"net/http"
+)
 
 type HttpRecordFaceResponse struct {
-	HttpHead
+	HttpHeader
 	Logs []HttpRecordFaceData `json:"logs"`
 }
 
@@ -26,6 +29,16 @@ type HttpRecordFaceData struct {
 	HealthCodePicture  string `json:"health_code_picture,omitempty"`
 }
 
-func ParseRecordFace(r *http.Request) (resp HttpRecordFaceResponse, err error) {
+func ParseRecordFace(r *http.Request) (resp *HttpRecordFaceResponse, err error) {
+	err = r.ParseForm()
+	if err != nil {
+		return
+	}
+
+	resp = &HttpRecordFaceResponse{}
+	err = json.NewDecoder(r.Body).Decode(resp)
+	if err != nil {
+		return
+	}
 	return
 }

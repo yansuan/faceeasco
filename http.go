@@ -1,6 +1,6 @@
 package faceeasco
 
-type HttpHead struct {
+type HttpHeader struct {
 	SN    string `json:"sn"`    //
 	Count int    `json:"Count"` //
 }
