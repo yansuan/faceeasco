@@ -104,6 +104,11 @@ function addUser() {
             console.log(result);
         });
     }
+    function openDoor() {
+        $.get(callUrl + "?cmd=setDoor&sn="+sn,function (result) {
+            console.log(result);
+        });
+    }
 </script>
 <style type="text/css">
 html {
@@ -160,6 +165,7 @@ body {
     <button type="button" onclick="javascript:addUser()">addUser</button>
     <button type="button" onclick="javascript:setPassword()">setPassword</button>
     <button type="button" onclick="javascript:settingsGet()">settingsGet</button>
+    <button type="button" onclick="javascript:openDoor()">openDoor</button>
 </div>
 <form id="form">
     <input type="submit" value="Send" />

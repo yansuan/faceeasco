@@ -43,6 +43,23 @@ func main() {
 
 		} else if cmd == "client" {
 			log.Println(faceeasco.GetClientList())
+		} else if cmd == faceeasco.WEBSOCKET_API_SETTINGS_SET_Door {
+			form := faceeasco.WebsocketApiSettingsSetDoorRequest{}
+			form.Cmd = "to_device"
+			form.From = requestId
+			form.To = sn
+
+			form.Data = faceeasco.WebsocketApiSettingsSetDoorRequestData{}
+			form.Data.Cmd = faceeasco.WEBSOCKET_API_SETTINGS_SET_Door
+			form.Data.Value = "on"
+
+			resp, err := faceeasco.SendWebsocketMessage(requestId, sn, form)
+			if err != nil {
+				log.Println(cmd, err)
+				return
+			}
+			w.Header().Set("content-type", "text/json")
+			w.Write(resp)
 		}
 	})
 

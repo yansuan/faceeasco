@@ -105,9 +105,3 @@ func Remove(requestId string) {
 	defer q.Unlock()
 	delete(q.data, requestId)
 }
-
-func List() {
-	q.RLock()
-	defer q.RUnlock()
-
-}
