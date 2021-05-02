@@ -38,11 +38,6 @@ type WebsocketApiUserAddResponse struct {
 	WebsocketResponse
 }
 
-func init() {
-	apiPing := &WebsocketApiUserAdd{}
-	newWebsocketApi(WEBSOCKET_API_USER_ADD, apiPing.Response)
-}
-
 func (this *WebsocketApiUserAdd) Response(r []byte) interface{} {
 	return nil
 }

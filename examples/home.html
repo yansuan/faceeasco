@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+<script src="http://code.jquery.com/jquery-3.6.0.min.js"></script>
 <head>
 <title>Chat Example</title>
 <script type="text/javascript">
     var conn;
     var msg;
     var log;
+    var sn = "RLM-100111973";
+    var wsUrl = "ws://localhost:10001/face";
+    var callUrl = "http://localhost:10001/face/call";
 window.onload = function () {
     msg = document.getElementById("msg");
     log = document.getElementById("log");
@@ -30,38 +34,76 @@ window.onload = function () {
         return false;
     };
 
-    if (window["WebSocket"]) {
-        conn = new WebSocket("ws://localhost:10001/ws");
-        conn.onclose = function (evt) {
-            var item = document.createElement("div");
-            item.innerHTML = "<b>Connection closed.</b>";
-            appendLog(item);
-        };
-        conn.onmessage = function (evt) {
-            var messages = evt.data.split('\n');
-            for (var i = 0; i < messages.length; i++) {
-                var item = document.createElement("div");
-                item.innerText = messages[i];
-                appendLog(item);
-            }
-        };
-    } else {
-        var item = document.createElement("div");
-        item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
-        appendLog(item);
-    }
+    // if (window["WebSocket"]) {
+    //     conn = new WebSocket(wsUrl);
+    //     conn.onclose = function (evt) {
+    //         var item = document.createElement("div");
+    //         item.innerHTML = "<b>Connection closed.</b>";
+    //         appendLog(item);
+    //     };
+    //     conn.onmessage = function (evt) {
+    //         var messages = evt.data.split('\n');
+    //         for (var i = 0; i < messages.length; i++) {
+    //             var item = document.createElement("div");
+    //             item.innerText = messages[i];
+    //             appendLog(item);
+    //         }
+    //     };
+    // } else {
+    //     var item = document.createElement("div");
+    //     item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
+    //     appendLog(item);
+    // }
 };
+
+    function decla() {
+        var value = {
+            "cmd": "declare",
+            "type": "device",
+            "sn": sn,
+            "version_code":"1000xxx",
+            "version_name":"x.x.x."
+        };
+        msg.value = JSON.stringify(value);
+        conn.send(msg.value);
+    }
 
 
 function ping() {
     var value = {
         "cmd" : "ping",
-        "sn":"设备号"
+        "sn":sn
     };
     msg.value = JSON.stringify(value);
     conn.send(msg.value);
 }
 
+function addUser() {
+    var value = {
+        "cmd" : "ping",
+        "sn":sn
+    };
+    msg.value = JSON.stringify(value);
+    conn.send(msg.value);
+}
+    function setPassword() {
+        var value = {
+            "cmd" : "ping",
+            "sn":sn
+        };
+        msg.value = JSON.stringify(value);
+        conn.send(msg.value);
+    }
+    function clientList() {
+        $.get(callUrl + "?cmd=client",function (result) {
+            console.log(result);
+        });
+    }
+    function settingsGet() {
+        $.get(callUrl + "?cmd=getDeviceSettings&sn="+sn,function (result) {
+            console.log(result);
+        });
+    }
 </script>
 <style type="text/css">
 html {
@@ -85,10 +127,18 @@ body {
     top: 0.5em;
     left: 0.5em;
     right: 0.5em;
-    bottom: 3em;
+    bottom: 5em;
     overflow: auto;
 }
-
+#button {
+    padding: 0 0.5em 0 0.5em;
+    margin: 0;
+    position: absolute;
+    bottom: 3em;
+    left: 0px;
+    width: 100%;
+    overflow: hidden;
+}
 #form {
     padding: 0 0.5em 0 0.5em;
     margin: 0;
@@ -103,8 +153,15 @@ body {
 </head>
 <body>
 <div id="log"></div>
-<form id="form">
+<div id="button">
+    <button type="button" onclick="javascript:decla()">decla</button>
     <button type="button" onclick="javascript:ping()">ping</button>
+    <button type="button" onclick="javascript:clientList()">client list</button>
+    <button type="button" onclick="javascript:addUser()">addUser</button>
+    <button type="button" onclick="javascript:setPassword()">setPassword</button>
+    <button type="button" onclick="javascript:settingsGet()">settingsGet</button>
+</div>
+<form id="form">
     <input type="submit" value="Send" />
     <input type="text" id="msg" size="64"/>
 </form>

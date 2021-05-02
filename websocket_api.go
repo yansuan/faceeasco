@@ -2,49 +2,49 @@ package faceeasco
 
 import (
 	"encoding/json"
+	"github.com/yansuan/faceeasco/queue"
 	"log"
-)
-
-//type IWebsocketApi interface {
-//	GetCmd() string                  //得到当前的命令
-//	Read(message []byte) (err error) //请示
-//	Write() (err error)              //响应
-//
-//}
-
-var (
-	apis = make([]*WebsocketApi, 0)
+	"time"
 )
 
 //对接api的接口
 type WebsocketApi struct {
 	Cmd      string
-	FN       func(message []byte) (err error) //注册数据接口
+	FN       func(message []byte) (err error) //注册数接口
 	Response func(message []byte) interface{} //响应接口
 }
 
-func newWebsocketApi(cmd string, write func(message []byte) interface{}) {
-	apis = append(apis, &WebsocketApi{Cmd: cmd, Response: write})
-}
-
-//注册自己业务中的处理函数
-func RegisterWebsocketFunc(cmd string, fn func(message []byte) (err error)) {
-	for _, api := range apis {
-		if api.Cmd == cmd {
-			api.FN = fn
+func SendWebsocketMessage(requestId, sn string, data interface{}) (result []byte, err error) {
+	var message []byte
+	if bs, ok := data.([]byte); ok {
+		message = bs
+	} else {
+		message, err = json.Marshal(data)
+		if err != nil {
+			return
 		}
 	}
-	return
-}
 
-func SendWebsocketMessage(sn string, data interface{}) (err error) {
-	message, err1 := json.Marshal(data)
-	if err1 != nil {
-		err = err1
+	queueClient := queue.Connect(requestId)
+	err = hub.send(sn, message)
+
+	body := make([]byte, 0)
+	isTimeOut := true
+	select {
+	case body = <-queueClient.Message:
+		isTimeOut = false
+	case <-time.After(time.Second * queue.TIMEOUT):
+		isTimeOut = true
+		break
+	}
+
+	if isTimeOut {
+		err = ErrorTimeout
 		return
 	}
 
-	err = hub.send(sn, message)
+	result = body
+
 	return
 }
 
@@ -58,60 +58,50 @@ func GetAliveClient(sn string) bool {
 	return false
 }
 
+func GetClientList() []string {
+	var result = make([]string, 0)
+	for client := range hub.clients {
+		if client.sn != "" {
+			result = append(result, client.sn)
+		}
+	}
+
+	return result
+}
+
 func callApi(client *WebsocketClient, message []byte) (err error) {
-	r := &WebsocketRequest{}
-	err = json.Unmarshal(message, r)
+	rData := &WebsocketRequest{}
+	err = json.Unmarshal(message, rData)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	client.sn = r.From
-
-	////读取信息
-	var api *WebsocketApi
-	for _, a := range apis {
-		cmd := r.Cmd
-		//ping接口不一样
-		if r.Cmd == "to_client" {
-			cmd = r.Data.Cmd
-		}
-		if a.Cmd == cmd {
-			api = a
-			break
-		}
-	}
-
-	//set client sn value
-	if r.Cmd == WEBSOCKET_API_PING {
-		client.sn = r.SN
-	}
-
-	//没有找到对应的api
-	if api == nil {
+	if rData.Cmd == WEBSOCKET_API_PING {
+		//client.sn = rData.SN
+		api := WebsocketApiPing{}
+		respMessage := api.Response(message)
+		err = client.SendMessage(respMessage)
 		return
 	}
 
-	if api.FN != nil {
-		err = api.FN(message)
-		if err != nil {
-			return
-		}
+	if rData.Cmd == WEBSOCKET_API_DECLARE {
+		client.sn = rData.SN
+		client.hub.register <- client
+		api := WebsocketApiDeclare{}
+		respMessage := api.Response(message)
+		err = client.SendMessage(respMessage)
+		return
 	}
 
-	resp := api.Response(message)
+	//to_client,add queue
+	msg := &queue.Message{}
+	msg.Time = time.Now().Unix()
+	msg.RequestId = rData.To
+	msg.SN = rData.From
+	msg.Body = message
 
-	if resp != nil {
-		respBytes, err3 := json.Marshal(resp)
-		if err3 != nil {
-			err = err3
-			return
-		}
-
-		if len(respBytes) > 0 {
-			client.send <- respBytes
-		}
-	}
+	queue.Push(msg)
 
 	return
 }

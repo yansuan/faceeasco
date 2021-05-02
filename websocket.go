@@ -1,24 +1,24 @@
 package faceeasco
 
 import (
-	"encoding/json"
 	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
 )
 
 type WebsocketRequestHeader struct {
-	Cmd  string `json:"cmd"` //ping或to_device
-	From string `json:"from"`
-	To   string `json:"to"`
-	SN   string `json:"sn,omitempty"` //心跳时使用
+	Cmd  string `json:"cmd"`          //to_device
+	From string `json:"from"`         //deviceId
+	To   string `json:"to"`           //requestId
+	SN   string `json:"sn,omitempty"` //ping或declare时使用
 }
+
 type WebsocketRequestData struct {
 	Cmd string `json:"cmd"`
 }
 
 type WebsocketResponseHeader struct {
-	Cmd  string `json:"cmd"`  //to_client
+	Cmd  string `json:"cmd"`  //ping、declare、to_client
 	From string `json:"from"` //区别程序，自定义值
 	To   string `json:"to"`   //设备编号
 }
@@ -54,6 +54,7 @@ func init() {
 	hub = newHub()
 	go hub.run()
 }
+
 func ServeWebsocket(w http.ResponseWriter, r *http.Request, responseHeader http.Header) (err error) {
 	conn, err := upgrader.Upgrade(w, r, responseHeader)
 	if err != nil {
@@ -66,16 +67,5 @@ func ServeWebsocket(w http.ResponseWriter, r *http.Request, responseHeader http.
 
 	go client.readPump()
 	go client.writePump()
-	return
-}
-
-func SendWebsocketCommand(sn string, cmd interface{}) (err error) {
-	bytes, err1 := json.Marshal(cmd)
-	if err1 != nil {
-		err = err1
-		return
-	}
-
-	err = hub.send(sn, bytes)
 	return
 }

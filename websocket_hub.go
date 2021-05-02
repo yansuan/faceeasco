@@ -1,6 +1,8 @@
 package faceeasco
 
-import "errors"
+import (
+	"log"
+)
 
 type Hub struct {
 	// Registered clients.
@@ -51,6 +53,9 @@ func (h *Hub) run() {
 func (h *Hub) send(sn string, message []byte) (err error) {
 	isSend := false
 	for client := range h.clients {
+		if Debug {
+			log.Println("send", sn, client.sn)
+		}
 		if client.sn == sn {
 			client.send <- message
 			isSend = true
@@ -59,7 +64,7 @@ func (h *Hub) send(sn string, message []byte) (err error) {
 	}
 
 	if !isSend {
-		err = errors.New("websocket.send.err.10001")
+		err = ErrorNoSend
 	}
 
 	return

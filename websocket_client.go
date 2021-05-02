@@ -1,6 +1,7 @@
 package faceeasco
 
 import (
+	"encoding/json"
 	"github.com/gorilla/websocket"
 	"log"
 	"time"
@@ -26,14 +27,9 @@ var (
 )
 
 type WebsocketClient struct {
-	hub *Hub
-
-	sn string
-
-	// The websocket connection.
+	hub  *Hub
+	sn   string
 	conn *websocket.Conn
-
-	// Buffered channel of outbound messages.
 	send chan []byte
 }
 
@@ -49,7 +45,6 @@ func (c *WebsocketClient) readPump() {
 		return nil
 	})
 
-
 	for {
 		_, message, err := c.conn.ReadMessage()
 		if err != nil {
@@ -59,9 +54,14 @@ func (c *WebsocketClient) readPump() {
 			break
 		}
 
-		//message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		log.Println("readPump", string(message))
-		callApi(c, message)
+		err = callApi(c, message)
+		if err != nil {
+			log.Println("readPump", err)
+		}
+
+		if Debug {
+			log.Println("readPump", string(message))
+		}
 
 		//c.hub.broadcast <- message
 	}
@@ -89,6 +89,10 @@ func (c *WebsocketClient) writePump() {
 			}
 			w.Write(message)
 
+			if Debug {
+				log.Println("writePump", string(message))
+			}
+
 			// Add queued chat messages to the current websocket message.
 			n := len(c.send)
 			for i := 0; i < n; i++ {
@@ -106,4 +110,28 @@ func (c *WebsocketClient) writePump() {
 			}
 		}
 	}
+}
+
+func (c *WebsocketClient) SendMessage(message interface{}) (err error) {
+	if message == nil {
+		return
+	}
+
+	if bytes, ok := message.([]byte); ok {
+		c.send <- bytes
+		return
+	}
+
+	var bytes []byte
+	bytes, err = json.Marshal(message)
+	if err != nil {
+		return
+	}
+
+	if Debug {
+		log.Println(string(bytes))
+	}
+
+	c.send <- bytes
+	return
 }
