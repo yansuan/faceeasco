@@ -13,7 +13,5 @@ type WebsocketApiSettingsSetDoorRequestData struct {
 
 type WebsocketApiSettingsSetDoorResponse struct {
 	WebsocketResponseHeader
-	Data struct {
-		WebsocketResponseData
-	}
+	Data WebsocketResponseData `json:"data"`
 }

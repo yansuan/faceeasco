@@ -1,8 +1,5 @@
 package faceeasco
 
-type WebsocketApiUserAdd struct {
-}
-
 type WebsocketApiUserAddRequest struct {
 	WebsocketRequestHeader
 	Data WebsocketApiUserAddRequestData `json:"data"`
@@ -25,7 +22,7 @@ type WebsocketApiUserAddRequestData struct {
 	ValidCycle      []WebsocketApiUserAddValidCycle `json:"valid_cycle"`      //
 	StartTime       string                          `json:"start_time"`       //
 	EndTime         string                          `json:"end_time"`         //
-	passRuleId      string                          `json:"pass_rule_id"`     //
+	PassRuleId      string                          `json:"pass_rule_id"`     //
 	Mode            int                             `json:"mode"`             //
 }
 
@@ -38,6 +35,3 @@ type WebsocketApiUserAddResponse struct {
 	WebsocketResponse
 }
 
-func (this *WebsocketApiUserAdd) Response(r []byte) interface{} {
-	return nil
-}

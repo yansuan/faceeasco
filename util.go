@@ -4,19 +4,25 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
-	"github.com/google/uuid"
 )
 
 const (
 	Base64ImageHeader = "data:image/jpeg;base64,"
 )
 
-func Base64ToImage(base []byte) (result []byte, err error) {
-	result, err = base64.StdEncoding.DecodeString(string(base))
+func Base64ToImage(base string) (result []byte, err error) {
+	v, err1 := url.QueryUnescape(base)
+	if err1 != nil {
+		err = err1
+		return
+	}
+	result, err = base64.StdEncoding.DecodeString(v)
 	if err != nil {
 		return
 	}
@@ -24,10 +30,11 @@ func Base64ToImage(base []byte) (result []byte, err error) {
 	return
 }
 
-func ImageToBase64(img []byte) (result []byte, err error) {
+func ImageToBase64(img []byte) (result string, err error) {
 	s := base64.StdEncoding.EncodeToString(img)
 	s = Base64ImageHeader + s
-	result = []byte(s)
+
+	result = url.QueryEscape(string(s))
 
 	return
 }
@@ -64,6 +71,6 @@ func FileDownload(url string, targetPath string) (err error) {
 	return
 }
 
-func NewUUID() string {
+func NewRequestId() string {
 	return uuid.NewString()
 }

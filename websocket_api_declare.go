@@ -4,11 +4,11 @@ type WebsocketApiDeclare struct {
 }
 
 type WebsocketApiDeclareRequest struct {
-	Cmd         string `json:"cmd"`  //
-	Type        string `json:"type"` //
-	SN          string `json:"sn"`   //
-	VersionCode string `json:"version_code"`
-	VersionName string `json:"version_name"`
+	Cmd         string `json:"cmd"`          //
+	Type        string `json:"type"`         //
+	SN          string `json:"sn"`           //
+	VersionCode string `json:"version_code"` //
+	VersionName string `json:"version_name"` //
 }
 
 type WebsocketApiDeclareResponse struct {
@@ -19,7 +19,7 @@ type WebsocketApiDeclareResponse struct {
 func (this *WebsocketApiDeclare) Response(r []byte) interface{} {
 	resp := &WebsocketApiDeclareResponse{}
 	resp.Cmd = "declare"
-	resp.ClientId = "test"
+	resp.ClientId = NewRequestId()
 
 	return resp
 }
