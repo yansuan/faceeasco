@@ -106,6 +106,11 @@ function ping() {
             console.log(result);
         });
     }
+    function onlineAuthorization() {
+        $.get(callUrl + "?cmd=onlineAuthorization&sn="+sn,function (result) {
+            console.log(result);
+        });
+    }
 </script>
 <style type="text/css">
 html {
@@ -163,6 +168,7 @@ body {
     <button type="button" onclick="javascript:setPassword()">setPassword</button>
     <button type="button" onclick="javascript:settingsGet()">settingsGet</button>
     <button type="button" onclick="javascript:openDoor()">openDoor</button>
+    <button type="button" onclick="javascript:onlineAuthorization()">onlineAuthorization</button>
 </div>
 <form id="form">
     <input type="submit" value="Send" />

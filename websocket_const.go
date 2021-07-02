@@ -12,6 +12,9 @@ const (
 	//
 	WEBSOCKET_API_VISIT_ADD = "addVisit" //下发人证比对基本信息
 
+	//
+	WEBSOCKET_API_OnlineAuthorization = "onlineAuthorization" //抓拍现场照片
+
 	//设备设置接口
 	WEBSOCKET_API_SETTINGS_GET                              = "getDeviceSettings"               //获取设备设置
 	WEBSOCKET_API_SETTINGS_SET_customHomeLogo               = "customHomeLogo"                  //设置设备 logo

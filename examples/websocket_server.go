@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"github.com/yansuan/faceeasco"
 	"log"
 	"net/http"
@@ -94,6 +95,33 @@ func main() {
 			w.Header().Set("content-type", "text/json")
 			w.Write(resp)
 
+		} else if cmd == faceeasco.WEBSOCKET_API_OnlineAuthorization {
+			form := faceeasco.WebsocketApiOnlineAuthorizationRequest{}
+			form.Cmd = "to_device"
+			form.From = requestId
+			form.To = sn
+
+			form.Data = faceeasco.WebsocketApiOnlineAuthorizationRequestData{}
+			form.Data.Cmd = faceeasco.WEBSOCKET_API_OnlineAuthorization
+
+			resp, err := faceeasco.SendWebsocketMessage(requestId, sn, form)
+			if err != nil {
+				log.Println(cmd, err)
+				return
+			}
+			respData := &faceeasco.WebsocketApiOnlineAuthorizationResponse{}
+			err = json.Unmarshal(resp, respData)
+
+			w.Header().Set("content-type", "text/html")
+			src, err1 := faceeasco.Base64Unescape(respData.Data.VlFaceTemplate)
+			if err != nil {
+				log.Println(err1)
+				return
+			}
+			w.Write([]byte(`<img src="` + faceeasco.Base64ImageHeader + string(src) + `"`))
+			if err != nil {
+				log.Println(err)
+			}
 		}
 	})
 

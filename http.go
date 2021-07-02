@@ -22,7 +22,6 @@ func ParseRequest(r *http.Request, resp interface{}) (err error) {
 		return
 	}
 
-	resp = &HttpRecordFaceResponse{}
 	err = json.NewDecoder(r.Body).Decode(resp)
 	if err != nil {
 		return

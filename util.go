@@ -16,6 +16,11 @@ const (
 	Base64ImageHeader = "data:image/jpeg;base64,"
 )
 
+func Base64Unescape(base string) (result string, err error) {
+	result, err = url.QueryUnescape(base)
+	return
+}
+
 func Base64ToImage(base string) (result []byte, err error) {
 	v, err1 := url.QueryUnescape(base)
 	if err1 != nil {
