@@ -2,7 +2,7 @@ package faceeasco
 
 type WebsocketApiUserGetRequest struct {
 	WebsocketRequestHeader
-	Data WebsocketApiUserAddRequestData `json:"data"`
+	Data WebsocketApiUserGetRequestData `json:"data"`
 }
 
 type WebsocketApiUserGetRequestData struct {
