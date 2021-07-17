@@ -9,6 +9,8 @@ const (
 	WEBSOCKET_API_USER_DEL       = "delUser"      //删除用户
 	WEBSOCKET_API_USER_DEL_MULTI = "delMultiUser" //批量删除人员
 	WEBSOCKET_API_USER_DEL_ALL   = "delAllUser"   //删除全部人员
+	WEBSOCKET_API_USER_GET       = "getUserInfo"  //读取用户信息
+
 	//
 	WEBSOCKET_API_VISIT_ADD = "addVisit" //下发人证比对基本信息
 
