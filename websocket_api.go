@@ -38,8 +38,6 @@ func SendWebsocketMessage(requestId, sn string, data interface{}) (result []byte
 		break
 	}
 
-	queue.Debug()
-
 	if isTimeOut {
 		err = ErrorTimeout
 		return

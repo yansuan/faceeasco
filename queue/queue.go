@@ -83,7 +83,6 @@ func Push(msg *Message) {
 	q.data[msg.RequestId] = msg
 
 	for client := range q.clients {
-		log.Println("Push", msg.RequestId, client.RequestId)
 		if client.RequestId == msg.RequestId {
 			client.Message <- msg.Body
 		}
