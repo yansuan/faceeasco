@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-const TIMEOUT = 10
+const TIMEOUT = 20
 
 var q *Queue
 
