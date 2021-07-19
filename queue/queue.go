@@ -1,11 +1,12 @@
 package queue
 
 import (
+	"log"
 	"sync"
 	"time"
 )
 
-const TIMEOUT = 20
+const TIMEOUT = 10
 
 var q *Queue
 
@@ -47,6 +48,7 @@ func (this *Queue) cleanData() {
 
 	//删除过期消息
 	for requestId, msg := range this.data {
+
 		if msg.Time+TIMEOUT > now {
 			delete(this.data, requestId)
 		}
@@ -80,28 +82,29 @@ func Push(msg *Message) {
 	q.data[msg.RequestId] = msg
 
 	for client := range q.clients {
+		log.Println("Push", msg.RequestId, client.RequestId)
 		if client.RequestId == msg.RequestId {
 			client.Message <- msg.Body
 		}
 	}
 }
 
-func Pull(requestId string) *Message {
-	q.RLock()
-	defer q.RUnlock()
+//func Pull(requestId string) *Message {
+//	q.RLock()
+//	defer q.RUnlock()
+//
+//	now := time.Now().Unix()
+//	for id, msg := range q.data {
+//		if msg.Time+TIMEOUT <= now && requestId == id {
+//			return msg
+//		}
+//	}
+//
+//	return nil
+//}
 
-	now := time.Now().Unix()
-	for id, msg := range q.data {
-		if msg.Time+TIMEOUT <= now && requestId == id {
-			return msg
-		}
-	}
-
-	return nil
-}
-
-func Remove(requestId string) {
-	q.Lock()
-	defer q.Unlock()
-	delete(q.data, requestId)
-}
+//func Remove(requestId string) {
+//	q.Lock()
+//	defer q.Unlock()
+//	delete(q.data, requestId)
+//}
