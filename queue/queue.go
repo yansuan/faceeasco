@@ -70,7 +70,9 @@ func (this *Queue) clean() {
 }
 
 func Connect(requestId string) *Client {
-	c := &Client{RequestId: requestId,}
+	q.Lock()
+	defer q.Unlock()
+	c := &Client{RequestId: requestId}
 	c.Message = make(chan []byte)
 	q.clients[c] = time.Now().Unix()
 	return c
