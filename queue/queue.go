@@ -79,7 +79,7 @@ func Connect(requestId string) *Client {
 func Push(msg *Message) {
 	q.Lock()
 	defer q.Unlock()
-	q.data[msg.RequestId] = msg
+	//q.data[msg.RequestId] = msg
 
 	for client := range q.clients {
 		log.Println("Push", msg.RequestId, client.RequestId)
