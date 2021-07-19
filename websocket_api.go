@@ -43,6 +43,8 @@ func SendWebsocketMessage(requestId, sn string, data interface{}) (result []byte
 		return
 	}
 
+	queue.Debug()
+
 	result = body
 
 	return

@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-const TIMEOUT = 20
+const TIMEOUT = 10
 
 var q *Queue
 
@@ -81,13 +81,25 @@ func Connect(requestId string) *Client {
 func Push(msg *Message) {
 	q.Lock()
 	defer q.Unlock()
-	//q.data[msg.RequestId] = msg
+	q.data[msg.RequestId] = msg
 
 	for client := range q.clients {
 		log.Println("Push", msg.RequestId, client.RequestId)
 		if client.RequestId == msg.RequestId {
 			client.Message <- msg.Body
 		}
+	}
+}
+
+func Debug() {
+	log.Println("client")
+	for client := range q.clients {
+		log.Println(client.RequestId)
+	}
+
+	log.Println("data")
+	for k := range q.data {
+		log.Println(k)
 	}
 }
 
