@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 )
 
 const (
@@ -27,6 +28,9 @@ func Base64ToImage(base string) (result []byte, err error) {
 		err = err1
 		return
 	}
+
+	v = strings.TrimPrefix(v, Base64ImageHeader)
+
 	result, err = base64.StdEncoding.DecodeString(v)
 	if err != nil {
 		return
