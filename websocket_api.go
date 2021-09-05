@@ -26,6 +26,8 @@ func SendWebsocketMessage(requestId, sn string, data interface{}) (result []byte
 	}
 
 	queueClient := queue.Connect(requestId)
+	defer queue.Disconnect(requestId)
+
 	err = hub.send(sn, message)
 
 	body := make([]byte, 0)

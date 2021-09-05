@@ -53,12 +53,12 @@ func (this *Queue) cleanData() {
 		}
 	}
 
-	//删除过期client
-	for client, ts := range this.clients {
-		if ts+TIMEOUT < now {
-			delete(this.clients, client)
-		}
-	}
+	////删除过期client
+	//for client, ts := range this.clients {
+	//	if ts+TIMEOUT < now {
+	//		delete(this.clients, client)
+	//	}
+	//}
 }
 
 func (this *Queue) clean() {
@@ -75,6 +75,22 @@ func Connect(requestId string) *Client {
 	c.Message = make(chan []byte)
 	q.clients[c] = time.Now().Unix()
 	return c
+}
+
+func (this *Queue) Disconnect(requestId string) {
+	this.Lock()
+	defer this.Unlock()
+
+	for client := range this.clients {
+		if client.RequestId == requestId {
+			delete(this.clients, client)
+		}
+	}
+}
+
+func Disconnect(requestId string) {
+	this.Lock()
+	defer this.Unlock()
 }
 
 func Push(msg *Message) {
