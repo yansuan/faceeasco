@@ -77,20 +77,15 @@ func Connect(requestId string) *Client {
 	return c
 }
 
-func (this *Queue) Disconnect(requestId string) {
-	this.Lock()
-	defer this.Unlock()
+func Disconnect(requestId string) {
+	q.Lock()
+	defer q.Unlock()
 
-	for client := range this.clients {
+	for client := range q.clients {
 		if client.RequestId == requestId {
-			delete(this.clients, client)
+			delete(q.clients, client)
 		}
 	}
-}
-
-func Disconnect(requestId string) {
-	this.Lock()
-	defer this.Unlock()
 }
 
 func Push(msg *Message) {
