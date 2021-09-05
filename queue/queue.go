@@ -41,32 +41,32 @@ func newQueue() *Queue {
 	return o
 }
 
-func (this *Queue) cleanData() {
-	this.Lock()
-	defer this.Unlock()
-	now := time.Now().Unix()
+//func (this *Queue) cleanData() {
+//	this.Lock()
+//	defer this.Unlock()
+//	now := time.Now().Unix()
+//
+//	//删除过期消息
+//	for requestId, msg := range this.data {
+//		if msg.Time+TIMEOUT < now {
+//			delete(this.data, requestId)
+//		}
+//	}
+//
+//	////删除过期client
+//	//for client, ts := range this.clients {
+//	//	if ts+TIMEOUT < now {
+//	//		delete(this.clients, client)
+//	//	}
+//	//}
+//}
 
-	//删除过期消息
-	for requestId, msg := range this.data {
-		if msg.Time+TIMEOUT < now {
-			delete(this.data, requestId)
-		}
-	}
-
-	////删除过期client
-	//for client, ts := range this.clients {
-	//	if ts+TIMEOUT < now {
-	//		delete(this.clients, client)
-	//	}
-	//}
-}
-
-func (this *Queue) clean() {
-	for {
-		time.Sleep(TIMEOUT * time.Second)
-		this.cleanData()
-	}
-}
+//func (this *Queue) clean() {
+//	for {
+//		time.Sleep(TIMEOUT * time.Second)
+//		this.cleanData()
+//	}
+//}
 
 func Connect(requestId string) *Client {
 	q.Lock()
@@ -91,7 +91,7 @@ func Disconnect(requestId string) {
 func Push(msg *Message) {
 	q.Lock()
 	defer q.Unlock()
-	q.data[msg.RequestId] = msg
+	//q.data[msg.RequestId] = msg
 
 	for client := range q.clients {
 		if client.RequestId == msg.RequestId {
