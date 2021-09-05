@@ -12,7 +12,7 @@ var q *Queue
 
 func init() {
 	q = newQueue()
-	go q.clean()
+	//go q.clean()
 }
 
 type Message struct {
