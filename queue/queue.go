@@ -91,7 +91,7 @@ func Disconnect(requestId string) {
 func Push(msg *Message) {
 	q.Lock()
 	defer q.Unlock()
-	q.data[msg.RequestId] = msg
+	//q.data[msg.RequestId] = msg
 
 	for client := range q.clients {
 		if client.RequestId == msg.RequestId {
