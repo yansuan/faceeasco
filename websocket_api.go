@@ -60,6 +60,10 @@ func GetAliveClient(sn string) bool {
 	return false
 }
 
+func GetMessageData() map[string]*queue.Message {
+	return queue.GetData()
+}
+
 func GetClientList() []string {
 	var result = make([]string, 0)
 	for client := range hub.clients {

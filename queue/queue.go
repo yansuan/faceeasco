@@ -91,7 +91,7 @@ func Disconnect(requestId string) {
 func Push(msg *Message) {
 	q.Lock()
 	defer q.Unlock()
-	//q.data[msg.RequestId] = msg
+	q.data[msg.RequestId] = msg
 
 	for client := range q.clients {
 		if client.RequestId == msg.RequestId {
@@ -110,6 +110,13 @@ func Debug() {
 	for k := range q.data {
 		log.Println(k)
 	}
+}
+
+func GetData() (result map[string]*Message) {
+	q.RLock()
+	defer q.RUnlock()
+	return q.data
+	return
 }
 
 //func Pull(requestId string) *Message {
