@@ -50,14 +50,14 @@ func SendWebsocketMessage(requestId, sn string, data interface{}) (result []byte
 	return
 }
 
-func GetAliveClient(sn string) bool {
+func GetAliveClient(sn string) *WebsocketClient {
 	for client := range hub.clients {
 		if client.sn == sn {
-			return true
+			return client
 		}
 	}
 
-	return false
+	return nil
 }
 
 func GetMessageData() map[string]*queue.Message {
