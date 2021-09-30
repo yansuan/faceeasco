@@ -4,6 +4,7 @@ import (
 	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
+	"time"
 )
 
 type WebsocketRequestHeader struct {
@@ -62,7 +63,7 @@ func ServeWebsocket(w http.ResponseWriter, r *http.Request, responseHeader http.
 		return
 	}
 
-	client := &WebsocketClient{hub: hub, conn: conn, send: make(chan []byte, 256)}
+	client := &WebsocketClient{hub: hub, conn: conn, send: make(chan []byte, 256), connTime: time.Now()}
 	client.hub.register <- client
 
 	go client.readPump()

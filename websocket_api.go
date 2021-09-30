@@ -64,15 +64,19 @@ func GetMessageData() map[string]*queue.Message {
 	return queue.GetData()
 }
 
-func GetClientList() []string {
-	var result = make([]string, 0)
-	for client := range hub.clients {
-		if client.sn != "" {
-			result = append(result, client.sn)
-		}
+func GetClientList() (result []*WebsocketClient) {
+	//var result = make([]string, 0)
+	//for client := range hub.clients {
+	//	if client.sn != "" {
+	//		result = append(result, client.sn)
+	//	}
+	//}
+
+	for k, _ := range hub.clients {
+		result = append(result, k)
 	}
 
-	return result
+	return
 }
 
 func callApi(client *WebsocketClient, message []byte) (err error) {

@@ -27,10 +27,18 @@ var (
 )
 
 type WebsocketClient struct {
-	hub  *Hub
-	sn   string
-	conn *websocket.Conn
-	send chan []byte
+	hub      *Hub
+	sn       string
+	conn     *websocket.Conn
+	send     chan []byte
+	connTime time.Time
+}
+
+func (c *WebsocketClient) GetSN() string {
+	return c.sn
+}
+func (c *WebsocketClient) GetConnTime() time.Time {
+	return c.connTime
 }
 
 func (c *WebsocketClient) readPump() {
@@ -90,7 +98,10 @@ func (c *WebsocketClient) writePump() {
 			w.Write(message)
 
 			if Debug {
-				log.Println("writePump", string(message))
+				resp := &WebsocketResponse{}
+				errJson := json.Unmarshal(message, resp)
+				dumpBody, _ := json.Marshal(resp)
+				log.Println("writePump", errJson, string(dumpBody))
 			}
 
 			// Add queued chat messages to the current websocket message.
