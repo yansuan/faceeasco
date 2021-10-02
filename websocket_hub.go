@@ -19,12 +19,14 @@ type Hub struct {
 }
 
 func newHub() *Hub {
-	return &Hub{
+	inst := &Hub{
 		broadcast:  make(chan []byte),
 		register:   make(chan *WebsocketClient),
 		unregister: make(chan *WebsocketClient),
 		clients:    make(map[*WebsocketClient]bool),
 	}
+	inst.run()
+	return inst
 }
 
 func (h *Hub) run() {

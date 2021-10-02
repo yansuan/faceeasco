@@ -6,13 +6,22 @@ import (
 	"time"
 )
 
-const TIMEOUT = 10
+//const TIMEOUT = 10
 
-var q *Queue
+//var q *Queue
 
-func init() {
-	q = newQueue()
-	//go q.clean()
+//func init() {
+//	q = newQueue()
+//	//go q.clean()
+//}
+
+func NewQueue(timeout int) *Queue {
+	o := &Queue{}
+	o.data = make(map[string]*Message)
+	o.clients = make(map[*Client]int64)
+	o.timeout = timeout
+
+	return o
 }
 
 type Message struct {
@@ -31,15 +40,16 @@ type Queue struct {
 	sync.RWMutex
 	data    map[string]*Message //
 	clients map[*Client]int64   //
+	timeout int
 }
 
-func newQueue() *Queue {
-	o := &Queue{}
-	o.data = make(map[string]*Message)
-	o.clients = make(map[*Client]int64)
-
-	return o
-}
+//func newQueue() *Queue {
+//	o := &Queue{}
+//	o.data = make(map[string]*Message)
+//	o.clients = make(map[*Client]int64)
+//
+//	return o
+//}
 
 //func (this *Queue) cleanData() {
 //	this.Lock()
@@ -68,7 +78,7 @@ func newQueue() *Queue {
 //	}
 //}
 
-func Connect(requestId string) *Client {
+func (q *Queue) Connect(requestId string) *Client {
 	q.Lock()
 	defer q.Unlock()
 	c := &Client{RequestId: requestId}
@@ -77,7 +87,7 @@ func Connect(requestId string) *Client {
 	return c
 }
 
-func Disconnect(requestId string) {
+func (q *Queue) Disconnect(requestId string) {
 	q.Lock()
 	defer q.Unlock()
 
@@ -88,7 +98,7 @@ func Disconnect(requestId string) {
 	}
 }
 
-func Push(msg *Message) {
+func (q *Queue) Push(msg *Message) {
 	q.Lock()
 	defer q.Unlock()
 	//q.data[msg.RequestId] = msg
@@ -100,7 +110,7 @@ func Push(msg *Message) {
 	}
 }
 
-func Debug() {
+func (q *Queue) Debug() {
 	log.Println("client")
 	for client := range q.clients {
 		log.Println(client.RequestId)
@@ -112,11 +122,10 @@ func Debug() {
 	}
 }
 
-func GetData() (result map[string]*Message) {
+func (q *Queue) GetData() (result map[string]*Message) {
 	q.RLock()
 	defer q.RUnlock()
 	return q.data
-	return
 }
 
 //func Pull(requestId string) *Message {

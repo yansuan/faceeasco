@@ -2,10 +2,23 @@ package faceeasco
 
 import (
 	"github.com/gorilla/websocket"
+	"github.com/yansuan/faceeasco/queue"
 	"log"
 	"net/http"
 	"time"
 )
+
+type Client struct {
+	Queue *queue.Queue
+	Hub   *Hub
+}
+
+func New() *Client {
+	inst := &Client{}
+	inst.Queue = queue.NewQueue(TIMEOUT)
+	inst.Hub = newHub()
+	return inst
+}
 
 type WebsocketRequestHeader struct {
 	Cmd  string `json:"cmd"`          //to_device
@@ -49,24 +62,17 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-var hub *Hub
-
-func init() {
-	hub = newHub()
-	go hub.run()
-}
-
-func ServeWebsocket(w http.ResponseWriter, r *http.Request, responseHeader http.Header) (err error) {
+func (this *Client) ServeWebsocket(w http.ResponseWriter, r *http.Request, responseHeader http.Header) (err error) {
 	conn, err := upgrader.Upgrade(w, r, responseHeader)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	client := &WebsocketClient{hub: hub, conn: conn, send: make(chan []byte, 256), connTime: time.Now()}
-	client.hub.register <- client
+	wsClient := &WebsocketClient{client: this, conn: conn, send: make(chan []byte, 256), connTime: time.Now()}
+	this.Hub.register <- wsClient
 
-	go client.readPump()
-	go client.writePump()
+	go wsClient.readPump()
+	go wsClient.writePump()
 	return
 }

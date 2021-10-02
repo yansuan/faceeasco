@@ -14,7 +14,7 @@ type WebsocketApi struct {
 	Response func(message []byte) interface{} //响应接口
 }
 
-func SendWebsocketMessage(requestId, sn string, data interface{}) (result []byte, err error) {
+func (this *Client) SendWebsocketMessage(requestId, sn string, data interface{}) (result []byte, err error) {
 	var message []byte
 	if bs, ok := data.([]byte); ok {
 		message = bs
@@ -25,17 +25,17 @@ func SendWebsocketMessage(requestId, sn string, data interface{}) (result []byte
 		}
 	}
 
-	queueClient := queue.Connect(requestId)
-	defer queue.Disconnect(requestId)
+	queueClient := this.Queue.Connect(requestId)
+	defer this.Queue.Disconnect(requestId)
 
-	err = hub.send(sn, message)
+	err = this.Hub.send(sn, message)
 
 	body := make([]byte, 0)
 	isTimeOut := true
 	select {
 	case body = <-queueClient.Message:
 		isTimeOut = false
-	case <-time.After(time.Second * queue.TIMEOUT):
+	case <-time.After(time.Second * time.Duration(TIMEOUT)):
 		isTimeOut = true
 		break
 	}
@@ -50,8 +50,8 @@ func SendWebsocketMessage(requestId, sn string, data interface{}) (result []byte
 	return
 }
 
-func GetAliveClient(sn string) *WebsocketClient {
-	for client := range hub.clients {
+func (this *Client) GetAliveClient(sn string) *WebsocketClient {
+	for client := range this.Hub.clients {
 		if client.sn == sn {
 			return client
 		}
@@ -60,11 +60,11 @@ func GetAliveClient(sn string) *WebsocketClient {
 	return nil
 }
 
-func GetMessageData() map[string]*queue.Message {
-	return queue.GetData()
+func (this *Client) GetMessageData() map[string]*queue.Message {
+	return this.Queue.GetData()
 }
 
-func GetClientList() (result []*WebsocketClient) {
+func (this *Client) GetClientList() (result []*WebsocketClient) {
 	//var result = make([]string, 0)
 	//for client := range hub.clients {
 	//	if client.sn != "" {
@@ -72,14 +72,14 @@ func GetClientList() (result []*WebsocketClient) {
 	//	}
 	//}
 
-	for k, _ := range hub.clients {
+	for k, _ := range this.Hub.clients {
 		result = append(result, k)
 	}
 
 	return
 }
 
-func callApi(client *WebsocketClient, message []byte) (err error) {
+func (this *Client) callApi(client *WebsocketClient, message []byte) (err error) {
 	rData := &WebsocketRequest{}
 	err = json.Unmarshal(message, rData)
 	if err != nil {
@@ -97,7 +97,7 @@ func callApi(client *WebsocketClient, message []byte) (err error) {
 
 	if rData.Cmd == WEBSOCKET_API_DECLARE {
 		client.sn = rData.SN
-		client.hub.register <- client
+		this.Hub.register <- client
 		api := WebsocketApiDeclare{}
 		respMessage := api.Response(message)
 		err = client.SendMessage(respMessage)
@@ -111,7 +111,7 @@ func callApi(client *WebsocketClient, message []byte) (err error) {
 	msg.SN = rData.From
 	msg.Body = message
 
-	queue.Push(msg)
+	this.Queue.Push(msg)
 
 	return
 }

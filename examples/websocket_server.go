@@ -12,7 +12,13 @@ var (
 	isNotAliveCount = 0
 )
 
+var (
+	client *faceeasco.Client
+)
+
 func init() {
+	client = faceeasco.New()
+
 	go func() {
 		for {
 			time.Sleep(1 * time.Second)
@@ -20,9 +26,10 @@ func init() {
 		}
 	}()
 }
+
 func alive() {
-	isAlive := faceeasco.GetAliveClient("RLM-100111973")
-	if isAlive == false {
+	isAlive := client.GetAliveClient("RLM-100111973")
+	if isAlive == nil {
 		isNotAliveCount++
 		log.Println("============================================================Alive check", isAlive, isNotAliveCount)
 	}
@@ -30,7 +37,7 @@ func alive() {
 func main() {
 	faceeasco.Debug = true
 	http.HandleFunc("/device/face1", func(w http.ResponseWriter, r *http.Request) {
-		faceeasco.ServeWebsocket(w, r, nil)
+		client.ServeWebsocket(w, r, nil)
 	})
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		log.Println("============================================================Alive check", isNotAliveCount)
@@ -56,7 +63,7 @@ func main() {
 			form.Data.Cmd = faceeasco.WEBSOCKET_API_SETTINGS_GET
 			form.Data.Settings = []string{"all"}
 
-			resp, err := faceeasco.SendWebsocketMessage(requestId, sn, form)
+			resp, err := client.SendWebsocketMessage(requestId, sn, form)
 			if err != nil {
 				log.Println(cmd, err)
 				return
@@ -66,7 +73,7 @@ func main() {
 
 		} else if cmd == "client" {
 			//log.Println(faceeasco.GetClientList())
-			clients := faceeasco.GetClientList()
+			clients := client.GetClientList()
 			for _, client := range clients {
 				log.Println(client.GetSN(), client.GetConnTime())
 			}
@@ -80,7 +87,7 @@ func main() {
 			form.Data.Cmd = faceeasco.WEBSOCKET_API_SETTINGS_SET_Door
 			form.Data.Value = "on"
 
-			resp, err := faceeasco.SendWebsocketMessage(requestId, sn, form)
+			resp, err := client.SendWebsocketMessage(requestId, sn, form)
 			if err != nil {
 				log.Println(cmd, err)
 				return
@@ -114,7 +121,7 @@ func main() {
 				form.Data.IdValid = ""
 				form.Data.Mode = 0
 
-				resp, err := faceeasco.SendWebsocketMessage(userAddRequestId, sn, form)
+				resp, err := client.SendWebsocketMessage(userAddRequestId, sn, form)
 				if err != nil {
 					log.Println("ERROR:==================", cmd, err, resp)
 					return
@@ -132,7 +139,7 @@ func main() {
 			form.Data = faceeasco.WebsocketApiOnlineAuthorizationRequestData{}
 			form.Data.Cmd = faceeasco.WEBSOCKET_API_OnlineAuthorization
 
-			resp, err := faceeasco.SendWebsocketMessage(requestId, sn, form)
+			resp, err := client.SendWebsocketMessage(requestId, sn, form)
 			if err != nil {
 				log.Println(cmd, err)
 				return

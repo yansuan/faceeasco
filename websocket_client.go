@@ -27,7 +27,7 @@ var (
 )
 
 type WebsocketClient struct {
-	hub      *Hub
+	client *Client
 	sn       string
 	conn     *websocket.Conn
 	send     chan []byte
@@ -43,7 +43,7 @@ func (c *WebsocketClient) GetConnTime() time.Time {
 
 func (c *WebsocketClient) readPump() {
 	defer func() {
-		c.hub.unregister <- c
+		c.client.Hub.unregister <- c
 		c.conn.Close()
 	}()
 	//c.conn.SetReadLimit(maxMessageSize)
@@ -57,12 +57,14 @@ func (c *WebsocketClient) readPump() {
 		_, message, err := c.conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("error: %v", err)
+				log.Printf("websocket IsUnexpectedCloseError: %v", err)
+			} else {
+				log.Printf("websocket Error: %v", err)
 			}
 			break
 		}
 
-		err = callApi(c, message)
+		err = c.client.callApi(c, message)
 		if err != nil {
 			log.Println("readPump", err)
 		}

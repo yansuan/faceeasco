@@ -10,6 +10,7 @@ import (
 var (
 	Version = "0.0.1"
 	Debug   = false
+	TIMEOUT = 10
 )
 
 var defaultConnectTimeout = 5 * time.Second
