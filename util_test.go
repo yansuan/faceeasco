@@ -14,8 +14,8 @@ func TestFileRead(t *testing.T) {
 }
 
 func TestNewUUID(t *testing.T) {
-	log.Println(NewUUID())
-	log.Println(NewUUID())
-	log.Println(NewUUID())
-	log.Println(NewUUID())
+	//log.Println(NewUUID())
+	//log.Println(NewUUID())
+	//log.Println(NewUUID())
+	//log.Println(NewUUID())
 }
