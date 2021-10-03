@@ -25,7 +25,7 @@ func newHub() *Hub {
 		unregister: make(chan *WebsocketClient),
 		clients:    make(map[*WebsocketClient]bool),
 	}
-	inst.run()
+	go inst.run()
 	return inst
 }
 
