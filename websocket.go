@@ -47,7 +47,7 @@ type WebsocketResponseData struct {
 //数据包
 type WebsocketRequest struct {
 	WebsocketRequestHeader
-	Data WebsocketRequestData `json:"data"`
+	Data interface{} `json:"data"`
 }
 
 //公共信息
