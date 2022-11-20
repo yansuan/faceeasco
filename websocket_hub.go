@@ -2,6 +2,7 @@ package faceeasco
 
 import (
 	"log"
+	"sync"
 )
 
 type Hub struct {
@@ -16,6 +17,8 @@ type Hub struct {
 
 	// Unregister requests from clients.
 	unregister chan *WebsocketClient
+
+	sync.Mutex
 }
 
 func newHub() *Hub {
@@ -31,22 +34,29 @@ func newHub() *Hub {
 
 func (h *Hub) run() {
 	for {
-		select {
-		case client := <-h.register:
-			h.clients[client] = true
-		case client := <-h.unregister:
-			if _, ok := h.clients[client]; ok {
-				delete(h.clients, client)
+		h.runOne()
+	}
+}
+
+func (h *Hub) runOne() {
+	h.Lock()
+	defer h.Unlock()
+
+	select {
+	case client := <-h.register:
+		h.clients[client] = true
+	case client := <-h.unregister:
+		if _, ok := h.clients[client]; ok {
+			delete(h.clients, client)
+			close(client.send)
+		}
+	case message := <-h.broadcast:
+		for client := range h.clients {
+			select {
+			case client.send <- message:
+			default:
 				close(client.send)
-			}
-		case message := <-h.broadcast:
-			for client := range h.clients {
-				select {
-				case client.send <- message:
-				default:
-					close(client.send)
-					delete(h.clients, client)
-				}
+				delete(h.clients, client)
 			}
 		}
 	}
